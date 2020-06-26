@@ -519,3 +519,8 @@ git commit -m "first"
 git remote add origin https://github.com/wonderfulkasey/worldmaker.git
 git add .
 git init
+git add .
+git commit -m "first"
+git push
+git remote add origin https://github.com/wonderfulkasey/worldmaker.git
+git push -u origin master
