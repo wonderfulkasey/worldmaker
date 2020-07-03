@@ -12,8 +12,15 @@ class UsersController < ApplicationController
   
     def create
       @user = User.new(user_params)
-      #method in application_controller
-      signup_user(@user)
+      if @user.save
+        session[:user_id] = @user.id # log in the user
+        redirect_to user_path(@user), flash: { success: "You successfully registered and created your preliminary profile, #{current_user.name}!" }
+      else
+        3.times { @user.treatments.build }
+        flash.now[:error] = "Your registration attempt was unsuccessful. Please try again."
+        render :new # present the registration form so the user can try signing up again
+      end
+  
     end
   
   
