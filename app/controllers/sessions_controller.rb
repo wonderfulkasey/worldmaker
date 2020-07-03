@@ -5,9 +5,21 @@ class SessionsController < ApplicationController
     def new
     end
   
-    def create
-      #method in application controller
-      log_in_user_with_omniauth
+    def create # receives data submitted in login form, authenticates and logs in a valid user
+      if auth_hash = request.env["omniauth.auth"]
+        @user = User.find_or_create_by_omniauth(auth_hash)
+        session[:user_id] = @user.id
+        redirect_to user_path(@user), flash: { success: "You successfully logged in!" }
+      else
+        @user = User.find_by(email: params[:email])
+        if @user && @user.authenticate(params[:password])
+          session[:user_id] = @user.id # log in the user
+          redirect_to user_path(@user), flash: { success: "You successfully logged in! Welcome back to OCDefeat, #{@user.name}!" }
+        else # present login form so user can try logging in again
+          flash.now[:error] = "Your login attempt was unsuccessful. Please enter a valid email and password combination."
+          render :new
+        end
+      end
     end
   
   
@@ -21,8 +33,9 @@ class SessionsController < ApplicationController
   
     private
   
-    def auth
-      request.env['omniauth.auth']
+    def prevent_logged_in_users_from_viewing_login
+      redirect_to root_path, alert: "You cannot view the login form since you're already logged in!" if current_user
     end
+end
   
   end
